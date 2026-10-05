@@ -64,6 +64,10 @@ class TestConsoleFileStorage(unittest.TestCase):
         except Exception:
             pass
 
+    def get(self, cls, obj_id):
+        """Return an object from storage"""
+        return storage.all()[cls + "." + obj_id]
+
     def test_create_state(self):
         """create adds a new State to storage"""
         obj_id = run("create State")
@@ -79,6 +83,63 @@ class TestConsoleFileStorage(unittest.TestCase):
         obj_id = run("create Place")
         run("destroy Place " + obj_id)
         self.assertNotIn("Place." + obj_id, storage.all())
+
+    def test_param_string(self):
+        """string parameter is set"""
+        obj_id = run('create State name="California"')
+        self.assertEqual(self.get("State", obj_id).name, "California")
+
+    def test_param_underscore_to_space(self):
+        """underscores in strings become spaces"""
+        obj_id = run('create Place name="My_little_house"')
+        self.assertEqual(self.get("Place", obj_id).name, "My little house")
+
+    def test_param_escaped_quote(self):
+        """escaped double quotes are kept"""
+        obj_id = run('create State name="My_\\"big\\"_state"')
+        self.assertEqual(self.get("State", obj_id).name, 'My "big" state')
+
+    def test_param_int(self):
+        """integer parameter is set as int"""
+        obj_id = run('create Place number_rooms=4')
+        value = self.get("Place", obj_id).number_rooms
+        self.assertEqual(value, 4)
+        self.assertIs(type(value), int)
+
+    def test_param_float(self):
+        """float parameter is set as float"""
+        obj_id = run('create Place latitude=37.773972')
+        value = self.get("Place", obj_id).latitude
+        self.assertEqual(value, 37.773972)
+        self.assertIs(type(value), float)
+
+    def test_param_negative_float(self):
+        """negative float parameter is set"""
+        obj_id = run('create Place longitude=-122.431297')
+        self.assertEqual(self.get("Place", obj_id).longitude, -122.431297)
+
+    def test_param_multiple(self):
+        """several parameters are all set"""
+        obj_id = run('create Place city_id="0001" max_guest=10 '
+                     'price_by_night=300')
+        obj = self.get("Place", obj_id)
+        self.assertEqual(obj.city_id, "0001")
+        self.assertEqual(obj.max_guest, 10)
+        self.assertEqual(obj.price_by_night, 300)
+
+    def test_param_invalid_skipped(self):
+        """unquoted text, bad numbers and missing = are skipped"""
+        obj_id = run('create State name=California size=1.2.3 '
+                     'rank=abc nothing')
+        obj = self.get("State", obj_id)
+        self.assertNotIn('name', obj.__dict__)
+        self.assertNotIn('size', obj.__dict__)
+        self.assertNotIn('rank', obj.__dict__)
+
+    def test_param_unescaped_quote_skipped(self):
+        """a string with an unescaped quote inside is skipped"""
+        obj_id = run('create State name="Cali"fornia"')
+        self.assertNotIn('name', self.get("State", obj_id).__dict__)
 
 
 if __name__ == "__main__":
