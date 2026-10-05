@@ -8,6 +8,7 @@ import json
 import os
 
 
+@unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db', "FileStorage only")
 class test_basemodel(unittest.TestCase):
     """ """
 
