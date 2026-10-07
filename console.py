@@ -33,7 +33,7 @@ class HBNBCommand(cmd.Cmd):
     def preloop(self):
         """Prints if isatty is false"""
         if not sys.__stdin__.isatty():
-            print('(hbnb)')
+            print('(hbnb) ', end='')
 
     def precmd(self, line):
         """Reformat command line for advanced command syntax.
@@ -238,7 +238,7 @@ class HBNBCommand(cmd.Cmd):
             for k, v in storage.all().items():
                 print_list.append(str(v))
 
-        print(print_list)
+        print("[" + ", ".join(print_list) + "]")
 
     def help_all(self):
         """ Help information for the all command """
@@ -317,8 +317,8 @@ class HBNBCommand(cmd.Cmd):
 
             args = [att_name, att_val]
 
-        # retrieve dictionary of current objects
-        new_dict = storage.all()[key]
+        # retrieve the object to update
+        obj = storage.all()[key]
 
         # iterate through attr names and values
         for i, att_name in enumerate(args):
@@ -335,10 +335,10 @@ class HBNBCommand(cmd.Cmd):
                 if att_name in HBNBCommand.types:
                     att_val = HBNBCommand.types[att_name](att_val)
 
-                # update dictionary with name, value pair
-                new_dict.__dict__.update({att_name: att_val})
+                # setattr so SQLAlchemy tracks the change in db mode
+                setattr(obj, att_name, att_val)
 
-        new_dict.save()  # save updates to file
+        obj.save()  # save updates to storage
 
     def help_update(self):
         """ Help information for the update class """
