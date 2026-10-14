@@ -20,8 +20,6 @@ except ImportError:
 
 env.hosts = ['192.0.2.1', '192.0.2.2']
 
-_archive = []
-
 
 def do_pack():
     """Packs web_static into versions/web_static_<timestamp>.tgz.
@@ -84,12 +82,9 @@ def do_deploy(archive_path):
 def deploy():
     """Creates an archive and distributes it to the web servers.
 
-    The archive is created once and reused for every host.
-    Returns the result of do_deploy, or False if packing failed.
+    Returns the result of do_deploy, or False if no archive was created.
     """
-    if not _archive:
-        _archive.append(do_pack())
-    archive_path = _archive[0]
+    archive_path = do_pack()
     if archive_path is None:
         return False
     return do_deploy(archive_path)
