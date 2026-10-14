@@ -16,7 +16,7 @@ except ImportError:
 
     env = _Env()
 
-env.hosts = ['1.2.3.4', '5.6.7.8']
+env.hosts = ['REAL_WEB01_IP', 'REAL_WEB02_IP']
 env.user = 'ubuntu'
 
 
