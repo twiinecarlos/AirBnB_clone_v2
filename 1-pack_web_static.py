@@ -1,7 +1,11 @@
 #!/usr/bin/python3
 """Fabric script that generates a .tgz archive of the web_static folder."""
+import os
 from datetime import datetime
-from fabric.api import local
+try:
+    from fabric.api import local
+except ImportError:
+    from invoke import run as local
 
 
 def do_pack():
@@ -9,6 +13,8 @@ def do_pack():
 
     Returns the archive path on success, otherwise None.
     """
+    if not os.path.isdir("web_static"):
+        return None
     date = datetime.now().strftime("%Y%m%d%H%M%S")
     archive_path = "versions/web_static_{}.tgz".format(date)
     try:
@@ -18,5 +24,5 @@ def do_pack():
         if result.failed:
             return None
         return archive_path
-    except Exception:
+    except (Exception, SystemExit):
         return None
