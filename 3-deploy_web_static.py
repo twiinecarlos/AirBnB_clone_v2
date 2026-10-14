@@ -37,7 +37,7 @@ def do_pack():
         local("mkdir -p versions")
         print("Packing web_static to {}".format(archive_path))
         result = local("tar -cvzf {} web_static".format(archive_path))
-        if result.failed:
+        if getattr(result, "failed", False):
             return None
         return archive_path
     except (Exception, SystemExit):
