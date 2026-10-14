@@ -19,7 +19,6 @@ except ImportError:
     env = _Env()
 
 env.hosts = ['192.0.2.1', '192.0.2.2']
-env.user = 'ubuntu'
 
 _archive = []
 
